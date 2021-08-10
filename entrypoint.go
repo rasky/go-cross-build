@@ -105,7 +105,12 @@ func build(packageName, destDir string, platform map[string]string, ldflags stri
 	if compress {
 
 		// compressed gzip file name
-		gzFileName := fmt.Sprintf("%s-%s-%s.tar.gz", inputName, platformKernel, platformArch)
+		extension := "tar.gz"
+		if platformKernel == "windows" {
+			extension = "zip"
+		}
+
+		gzFileName := fmt.Sprintf("%s-%s-%s.%s", inputName, platformKernel, platformArch, extension)
 
 		/*------------*/
 
@@ -126,11 +131,15 @@ func build(packageName, destDir string, platform map[string]string, ldflags stri
 
 		/*------------*/
 
-		// command-line options for the `tar` command
-		tarOptions := append([]string{"-cvzf", gzFileName}, includeFiles...)
+		var tarCmd *exec.Cmd
 
-		// generate `tar` command
-		tarCmd := exec.Command("tar", tarOptions...)
+		if strings.HasSuffix(gzFileName, "zip") {
+			tarOptions := append([]string{"-9", gzFileName}, includeFiles...)
+			tarCmd = exec.Command("zip", tarOptions...)
+		} else {
+			tarOptions := append([]string{"-cvzf", gzFileName}, includeFiles...)
+			tarCmd = exec.Command("tar", tarOptions...)
+		}
 
 		// set working directory for the command
 		tarCmd.Dir = destDirPath
