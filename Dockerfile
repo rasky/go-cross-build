@@ -2,7 +2,7 @@
 FROM golang:1.16-buster
 
 # Install zip command
-RUN apt install zip
+RUN apt-get update && apt-get install -y zip
 
 # copy entrypoint file
 COPY entrypoint.go /usr/bin/entrypoint.go
